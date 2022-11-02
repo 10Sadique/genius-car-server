@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
@@ -19,6 +19,36 @@ const client = new MongoClient(uri, {
     useUnifiedTopology: true,
     serverApi: ServerApiVersion.v1,
 });
+
+// CRUD Operations
+async function run() {
+    try {
+        const servicesCollection = client
+            .db('geniusCar')
+            .collection('services');
+
+        // GET all services at '/services' path
+        app.get('/services', async (req, res) => {
+            const query = {};
+            const cursor = servicesCollection.find(query);
+            const services = await cursor.toArray();
+
+            res.send(services);
+        });
+
+        // GET one service at '/services/:id' path
+        app.get('/services/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const service = await servicesCollection.findOne(query);
+
+            res.send(service);
+        });
+    } finally {
+    }
+}
+
+run().catch((err) => console.error(err));
 
 // Init Server
 app.get('/', (req, res) => {
