@@ -23,14 +23,14 @@ const client = new MongoClient(uri, {
 // CRUD Operations
 async function run() {
     try {
-        const servicesCollection = client
-            .db('geniusCar')
-            .collection('services');
+        const serviceCollection = client.db('geniusCar').collection('services');
+        const orderCollection = client.db('geniusCar').collection('orders');
 
+        // Services Api
         // GET all services at '/services' path
         app.get('/services', async (req, res) => {
             const query = {};
-            const cursor = servicesCollection.find(query);
+            const cursor = serviceCollection.find(query);
             const services = await cursor.toArray();
 
             res.send(services);
@@ -40,9 +40,18 @@ async function run() {
         app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const service = await servicesCollection.findOne(query);
+            const service = await serviceCollection.findOne(query);
 
             res.send(service);
+        });
+
+        // Orders Api
+        app.post('/orders', async (req, res) => {
+            const order = req.body;
+
+            const result = await orderCollection.insertOne(order);
+
+            res.send(result);
         });
     } finally {
     }
